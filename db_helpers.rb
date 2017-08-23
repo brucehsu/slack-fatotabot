@@ -21,6 +21,8 @@ class DBHelper
               timestamp TIMESTAMP DEFAULT (NOW() AT TIME ZONE 'utc'));")
 
   def self.insert_weight(slack_id, weight)
+    user_id = user_id_by(slack_id)
+
     begin
       user_id = @@conn.exec_params("SELECT id FROM users WHERE slack_id = $1", [slack_id])&.values&.at(0)&.at(0)
       
@@ -33,6 +35,56 @@ class DBHelper
     rescue PG::Error => err
       STDERR.puts err
       false
+    end
+  end
+
+  def self.incr_weight(slack_id, weight)
+    user_id = user_id_by(slack_id)
+    weight = lastest_weight_by(user_id).to_f + weight.to_f
+
+    begin
+      @@conn.exec_params("INSERT INTO weights(weight, user_id) VALUES($1, $2)", [weight, user_id])
+      true
+    rescue PG::Error => err
+      STDERR.puts err
+      false
+    end
+  end
+
+  def self.decr_weight(slack_id, weight)
+    user_id = user_id_by(slack_id)
+    weight = lastest_weight_by(user_id).to_f - weight.to_f
+
+    begin
+      @@conn.exec_params("INSERT INTO weights(weight, user_id) VALUES($1, $2)", [weight, user_id])
+      true
+    rescue PG::Error => err
+      STDERR.puts err
+      false
+    end
+  end
+
+  def self.user_id_by(slack_id)
+    begin
+      user_id = @@conn.exec_params("SELECT id FROM users WHERE slack_id = $1", [slack_id])&.values&.at(0)&.at(0)
+      
+      if user_id.nil?
+        user_id = @@conn.exec_params("INSERT INTO users(slack_id) VALUES($1) RETURNING id", [slack_id]).getvalue(0, 0)
+      end
+
+      user_id
+    rescue PG::Error => err
+      STDERR.puts err
+      nil
+    end
+  end
+
+  def self.lastest_weight_by(user_id)
+    begin
+      @@conn.exec_params("SELECT weight FROM weights WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1", [user_id]).getvalue(0, 0)
+    rescue PG::Error => err
+      STDERR.puts err
+      nil
     end
   end
 end
