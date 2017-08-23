@@ -64,6 +64,33 @@ class DBHelper
     end
   end
 
+  def self.weight_diff_ranking
+    begin
+      users = {}
+      @@conn.exec("SELECT id, slack_id FROM users") do |result|
+        result.each do |row|
+          users[row.values[0]] = row.values[1]
+        end
+      end
+
+      text = ""
+
+      @@conn.exec("SELECT comp.user_id, comp.last-comp.first AS diff FROM
+                  (SELECT DISTINCT ON(user_id) FIRST_VALUE(weight) OVER (PARTITION BY user_id ORDER BY timestamp ASC) AS first,
+                    LAST_VALUE(weight) OVER (PARTITION BY user_id ORDER BY timestamp DESC) AS last,
+                    user_id FROM weights) AS comp ORDER BY diff ASC") do |result|
+        result.each do |row|
+          text += sprintf("- <@#{users[row.values[0]]}> %+.2fkg\n", row.values[1])
+        end
+      end
+
+      text
+    rescue PG::Error => err
+      STDERR.puts err
+      false
+    end
+  end
+
   def self.user_id_by(slack_id)
     begin
       user_id = @@conn.exec_params("SELECT id FROM users WHERE slack_id = $1", [slack_id])&.values&.at(0)&.at(0)

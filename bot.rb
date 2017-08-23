@@ -34,6 +34,15 @@ class Fatotabot < SlackRubyBot::Bot
       client.say(channel: data.channel, text: "啊啊啊我壞掉惹")
     end
   end
+
+  match /肥宅霸\s*戰$/i do |client, data, match|
+    rankings = DBHelper.weight_diff_ranking
+    if rankings
+    client.say(channel: data.channel, text: rankings)
+    else
+      client.say(channel: data.channel, text: "啊啊啊我壞掉惹")
+    end
+  end
 end
 
 Fatotabot.run
