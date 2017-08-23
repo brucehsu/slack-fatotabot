@@ -1,10 +1,13 @@
 version: '3'
 services:
   db:
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
     image: postgres:9.6.4-alpine
     environment:
-      POSTGRES_PASSWORD: "fatota"
-      POSTGRES_DB: fatota
+      POSTGRES_USER: YOUR_DB_USER
+      POSTGRES_PASSWORD: YOUR_DB_PASSWORD
+      POSTGRES_DB: YOUR_DB_NAME
     expose:
       - 5432
   
