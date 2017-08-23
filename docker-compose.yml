@@ -1,8 +1,13 @@
 version: '3'
+
+volumes:
+    fatotabot-pg:
+        external: true
+
 services:
   db:
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - fatotabot-pg:/var/lib/postgresql/data
     image: postgres:9.6.4-alpine
     environment:
       POSTGRES_USER: YOUR_DB_USER
