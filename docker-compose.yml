@@ -1,0 +1,21 @@
+version: '3'
+services:
+  db:
+    image: postgres:9.6.4-alpine
+    environment:
+      POSTGRES_PASSWORD: "fatota"
+      POSTGRES_DB: fatota
+    expose:
+      - 5432
+  
+  web:
+    build: .
+    image: fatotabot:local
+    volumes:
+      - ./:/fatotabot
+    working_dir: /fatotabot
+    command: bash -c "bundle install && bundle exec ruby bot.rb"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
