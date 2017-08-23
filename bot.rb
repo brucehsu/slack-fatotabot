@@ -6,6 +6,19 @@ Slack.configure do |config|
   config.token = ENV['SLACK_API_TOKEN']
 end
 
+module SlackRubyBot
+  module Commands
+    class Unknown < Base
+      match(/^(?<bot>\S*)[\s]*(?<expression>.*)$/)
+
+      def self.call(client, data, _match)
+        not_found = ["大聲點我不聽見", "阿鬼你還是說中文吧", "啊我丟聽嘸啊聽嘸", "你是不是想拉安霸"]
+        client.say(channel: data.channel, text: not_found.sample)
+      end
+    end
+  end
+end
+
 SlackRubyBot.configure do |config|
   config.aliases = ['肥宅霸']
 end
