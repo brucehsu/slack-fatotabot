@@ -24,7 +24,7 @@ SlackRubyBot.configure do |config|
 end
 
 class Fatotabot < SlackRubyBot::Bot
-  match /肥宅霸\s*set (?<weight>\d+(\.\d+)?)$/i do |client, data, match|
+  match /肥宅霸\s*set (?<weight>\d+(\.\d+)?).*$/i do |client, data, match|
     if DBHelper.insert_weight(data.user, match[:weight])
       client.say(channel: data.channel, text: "<@#{data.user}> 你現在重 #{match[:weight]}kg，不想讓人看到的話可以私訊")
     else
@@ -32,7 +32,7 @@ class Fatotabot < SlackRubyBot::Bot
     end
   end
 
-  match /肥宅霸\s*\+(?<weight>\d+(\.\d+)?)$/i do |client, data, match|
+  match /肥宅霸\s*\+(?<weight>\d+(\.\d+)?).*$/i do |client, data, match|
     if DBHelper.incr_weight(data.user, match[:weight])
       client.say(channel: data.channel, text: "<@#{data.user}> 你怎麼又胖 #{match[:weight]}kg 惹")
     else
@@ -40,7 +40,7 @@ class Fatotabot < SlackRubyBot::Bot
     end
   end
 
-  match /肥宅霸\s*\-(?<weight>\d+(\.\d+)?)$/i do |client, data, match|
+  match /肥宅霸\s*\-(?<weight>\d+(\.\d+)?).*$/i do |client, data, match|
     if DBHelper.decr_weight(data.user, match[:weight])
       client.say(channel: data.channel, text: "<@#{data.user}> 你瘦了 #{match[:weight]}kg 好棒棒")
     else
@@ -48,7 +48,7 @@ class Fatotabot < SlackRubyBot::Bot
     end
   end
 
-  match /肥宅霸\s*戰$/i do |client, data, match|
+  match /肥宅霸\s*戰.*$/i do |client, data, match|
     rankings = DBHelper.weight_diff_ranking
     if rankings
     client.say(channel: data.channel, text: rankings)
